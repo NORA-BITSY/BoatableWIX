@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Swirl Circle + Boatable Copilot</title>
+  <style>
+    /* Basic reset & layout */
+    html, body {
+      margin: 0; 
+      padding: 0; 
+      width: 100%; 
+      height: 100%;
+      overflow: hidden;
+      background: #fff;
+      font-family: sans-serif;
+    }
+    /* Center container */
+    .container {
+      position: relative;
+      width: 100%; 
+      height: 100%;
+      display: flex; 
+      align-items: center; 
+      justify-content: center;
+    }
+    /* The swirl circle */
+    .swirl {
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      background: conic-gradient(#0bf, #0f8, #0bf, #057);
+      position: relative;
+    }
+    /* The call button in center of swirl */
+    #callButton {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      cursor: pointer;
+      background: #eee;
+      border: none;
+      border-radius: 20px;
+      padding: 0.75rem 1.25rem;
+      font-size: 1rem;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    #callButton:hover {
+      background: #ddd;
+    }
+    /* Full-page orb container, hidden initially */
+    #orbContainer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #fff;
+      display: none;
+      z-index: 9999;
+    }
+    elevenlabs-convai {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- swirl circle -->
+    <div class="swirl">
+      <button id="callButton">Call AI agent</button>
+    </div>
+  </div>
+
+  <!-- hidden orb container -->
+  <div id="orbContainer">
+    <!-- Replace agent-id below with your real Boatable Copilot agent ID -->
+    <elevenlabs-convai agent-id="A8uz7rImnqZgqPN6JhST"></elevenlabs-convai>
+  </div>
+
+  <!-- ElevenLabs widget script -->
+  <script
+    src="https://elevenlabs.io/convai-widget/index.js"
+    async
+    type="text/javascript"
+  ></script>
+
+  <script>
+    const orbDiv = document.getElementById('orbContainer');
+    const callBtn = document.getElementById('callButton');
+
+    // Toggle the Boatable Copilot orb
+    callBtn.addEventListener('click', () => {
+      orbDiv.style.display = (orbDiv.style.display === 'none' || orbDiv.style.display === '') 
+        ? 'block' : 'none';
+
+      // Example: send a postMessage back to Wix Velo page
+      parent.postMessage({ type: 'circleClicked', visible: orbDiv.style.display }, '*');
+    });
+
+    // Listen for messages from Wix Velo
+    window.addEventListener('message', (event) => {
+      // Always validate origin if needed: if (event.origin !== 'https://yoursite.com') return;
+      const msg = event.data;
+
+      if (msg && msg.type === 'toggleOrb') {
+        // For instance, the Velo page can call `toggleOrb` on this side
+        orbDiv.style.display = (orbDiv.style.display === 'none' || orbDiv.style.display === '')
+          ? 'block' : 'none';
+      }
+      else if (msg && msg.type === 'pingCircle') {
+        // The Velo page wants some info from the swirl code, respond
+        parent.postMessage({ type: 'pongFromCircle', swirlStatus: 'Everything is good here!' }, '*');
+      }
+    });
+  </script>
+</body>
+</html>
